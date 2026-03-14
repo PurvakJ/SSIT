@@ -1,0 +1,109 @@
+.footer {
+    background: #fafafa;
+    padding: 4rem 0 2rem;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+  
+  .footer-logo {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
+  
+  .footer-logo .logo-shree {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #b89b7b;
+  }
+  
+  .footer-logo .logo-it {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #1a1a1a;
+    letter-spacing: 2px;
+  }
+  
+  .footer-description {
+    color: #666666;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  
+  .footer h4 {
+    color: #1a1a1a;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  
+  .footer h4::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: #b89b7b;
+  }
+  
+  .footer-links ul {
+    list-style: none;
+  }
+  
+  .footer-links li {
+    margin-bottom: 0.8rem;
+  }
+  
+  .footer-links a {
+    color: #666666;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-size: 0.95rem;
+  }
+  
+  .footer-links a:hover {
+    color: #b89b7b;
+  }
+  
+  .footer-links li:not(a) {
+    color: #666666;
+    font-size: 0.95rem;
+  }
+  
+  .footer-contact p {
+    color: #666666;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+  }
+  
+  .footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .footer-bottom p {
+    color: #999999;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 768px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
