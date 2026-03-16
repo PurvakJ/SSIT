@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getReviews, getWorks } from '../api';
 import { Link } from 'react-router-dom';
-import './Pages.css';
+import './review.css';
 
 function Reviews() {
   const [reviews, setReviews] = useState([]);
@@ -176,29 +176,30 @@ function Reviews() {
         {/* Filter and Search Toolbar */}
         <div className="reviews-toolbar">
           <div className="filter-group">
-            <select 
-              value={filterWork} 
-              onChange={(e) => setFilterWork(e.target.value)}
-              className="filter-select-enhanced"
-            >
-              <option value="all">All Works</option>
-              {Object.keys(works).map(workId => (
-                <option key={workId} value={workId}>
-                  {works[workId].name} ({reviews.filter(r => r.workId === workId).length})
-                </option>
-              ))}
-            </select>
 
-            <select 
-              value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value)}
-              className="filter-select-enhanced"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="highest">Highest Rating</option>
-              <option value="lowest">Lowest Rating</option>
-            </select>
+<select 
+  value={filterWork} 
+  onChange={(e) => setFilterWork(e.target.value)}
+  className="filter-select-enhanced work-filter"
+>
+  <option value="all">📋 All Works</option>
+  {Object.keys(works).map(workId => (
+    <option key={workId} value={workId}>
+      {works[workId].name} ({reviews.filter(r => r.workId === workId).length})
+    </option>
+  ))}
+</select>
+
+<select 
+  value={sortBy} 
+  onChange={(e) => setSortBy(e.target.value)}
+  className="filter-select-enhanced sort-filter"
+>
+  <option value="newest">🆕 Newest First</option>
+  <option value="oldest">📅 Oldest First</option>
+  <option value="highest">⭐ Highest Rating</option>
+  <option value="lowest">💫 Lowest Rating</option>
+</select>
           </div>
 
           <div className="search-box-enhanced">

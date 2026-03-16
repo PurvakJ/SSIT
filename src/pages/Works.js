@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getWorks, formatUrl, getDomainFromUrl } from '../api';
-import './Pages.css';
+import './works.css';
 
 function Works() {
   const [works, setWorks] = useState([]);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getWorks, addReview, getReviews, formatUrl, getDomainFromUrl } from '../api';
-import './Pages.css';
+import './workdetails.css';
 
 function WorkDetail() {
   const { id } = useParams();
@@ -15,6 +15,7 @@ function WorkDetail() {
     review: '',
     rating: 5
   });
+  const [, setHoverRating] = useState(0);
 
   const loadData = useCallback(async () => {
     try {
@@ -53,6 +54,7 @@ function WorkDetail() {
       });
       alert('Review submitted successfully!');
       setReviewForm({ name: '', review: '', rating: 5 });
+      setHoverRating(0);
       loadData();
     } catch (error) {
       console.error('Error submitting review:', error);
@@ -62,9 +64,6 @@ function WorkDetail() {
     }
   };
 
-  const renderStars = (rating) => {
-    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  };
 
   const getAverageRating = () => {
     if (reviews.length === 0) return 0;
@@ -76,6 +75,48 @@ function WorkDetail() {
     if (work) {
       window.open(formatUrl(work.viewLink), '_blank', 'noopener,noreferrer');
     }
+  };
+
+  // Star Rating Component
+  const StarRating = ({ rating, onRatingChange, interactive = true }) => {
+    const [localHover, setLocalHover] = useState(0);
+    
+    const handleMouseEnter = (index) => {
+      if (interactive) setLocalHover(index);
+    };
+    
+    const handleMouseLeave = () => {
+      if (interactive) setLocalHover(0);
+    };
+    
+    const handleClick = (index) => {
+      if (interactive && onRatingChange) {
+        onRatingChange(index);
+      }
+    };
+    
+    const displayRating = interactive && localHover > 0 ? localHover : rating;
+    
+    return (
+      <div className="star-rating-container">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={`star ${interactive ? 'interactive' : ''} ${star <= displayRating ? 'filled' : ''}`}
+            onMouseEnter={() => handleMouseEnter(star)}
+            onMouseLeave={handleMouseLeave}
+            onClick={() => handleClick(star)}
+          >
+            ★
+          </span>
+        ))}
+        {interactive && (
+          <span className="rating-text">
+            {rating} out of 5 stars
+          </span>
+        )}
+      </div>
+    );
   };
 
   if (loading) return (
@@ -189,7 +230,10 @@ function WorkDetail() {
                   <span className="average-number">{getAverageRating()}</span>
                   <span className="average-label">out of 5</span>
                   <div className="average-stars">
-                    {renderStars(Math.round(getAverageRating()))}
+                    <StarRating 
+                      rating={Math.round(getAverageRating())} 
+                      interactive={false}
+                    />
                   </div>
                   <span className="total-reviews">Based on {reviews.length} reviews</span>
                 </div>
@@ -227,7 +271,10 @@ function WorkDetail() {
                         <div className="reviewer-info">
                           <strong className="reviewer-name">{review.name}</strong>
                           <div className="reviewer-rating">
-                            {renderStars(parseInt(review.rating))}
+                            <StarRating 
+                              rating={parseInt(review.rating)} 
+                              interactive={false}
+                            />
                           </div>
                         </div>
                         <small className="review-date">
@@ -263,21 +310,14 @@ function WorkDetail() {
                       required
                       className="form-input-enhanced"
                     />
-                    
-                    <div className="rating-select">
-                      <label>Rating:</label>
-                      <select
-                        value={reviewForm.rating}
-                        onChange={(e) => setReviewForm({...reviewForm, rating: parseInt(e.target.value)})}
-                        className="form-select-enhanced"
-                      >
-                        {[5,4,3,2,1].map(num => (
-                          <option key={num} value={num}>
-                            {num} Star{num !== 1 ? 's' : ''} {num === 5 ? '⭐' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  </div>
+                  
+                  <div className="star-rating-field">
+                    <label>Your Rating:</label>
+                    <StarRating 
+                      rating={reviewForm.rating}
+                      onRatingChange={(newRating) => setReviewForm({...reviewForm, rating: newRating})}
+                    />
                   </div>
                   
                   <textarea
@@ -367,3 +407,4 @@ function WorkDetail() {
 }
 
 export default WorkDetail;
+

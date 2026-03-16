@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { addContact } from '../api';
-import './Pages.css';
+import './contact.css';
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ function Contact() {
 
   // Contact info cards
   const contactInfo = [
-    { icon: '📧', label: 'Email', value: 'shreeshyamitsolutions@gmail.com', link: 'mailto:shreeshyamitsolutions@gmail.com' },
+    { icon: '📧', label: 'Email', value: 'itsolutionsshreeshyam@gmail.com', link: 'mailto:itsolutionsshreeshyam@gmail.com' },
     { icon: '📱', label: 'Phone', value: '+91 62840-86208', link: 'tel:+916284086208' },
     { icon: '📍', label: 'Address', value: 'Patiala, Punjab, India', link: '#' },
     { icon: '⏰', label: 'Working Hours', value: 'Mon - Sat: 9:00 AM - 7:00 PM', link: null }

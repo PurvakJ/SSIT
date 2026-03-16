@@ -4,7 +4,7 @@ import {
   getReviews, deleteReview, getContacts, 
   formatUrl, getDomainFromUrl 
 } from '../api';
-import './Pages.css';
+import './admin.css';
 
 // Admin credentials
 const ADMIN_EMAIL = "purvakjindal2102@gmail.com";

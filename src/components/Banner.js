@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getWorks, getReviews } from '../api'; // Import both API functions
+import { getWorks, getReviews } from '../api';
 import './Banner.css';
 
 const Banner = () => {
@@ -15,8 +15,79 @@ const Banner = () => {
   const [works, setWorks] = useState({});
   const [loadingWorks, setLoadingWorks] = useState(true);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const bannerRef = useRef(null);
   const statsRef = useRef(null);
+
+  // Online image URLs for services
+  const serviceImages = {
+    1: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // Web development
+    2: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // Software development
+    3: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' // Mobile apps
+  };
+
+  // Online image URLs for technologies
+  const techImages = {
+    react: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+    node: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+    python: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+    java: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
+    aws: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg',
+    mongodb: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg',
+    flutter: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg',
+    angular: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg'
+  };
+
+  // Background images carousel array
+  const backgroundImages = [
+    // Web Development & Coding
+    'https://images.unsplash.com/photo-1587620962725-abab7fe55159?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Developer coding on laptop
+    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Code on screen with glasses
+    'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Laptop with code
+    'https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Code editor closeup
+    'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Laptop with code on desk
+    
+    // Software & Applications
+    'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // App development mockups
+    'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Mobile apps interface
+    'https://images.unsplash.com/photo-1531403009284-440f080d1e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Multiple devices showing apps
+    'https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // App interface design
+    'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Phone with app icons
+    
+    // UI/UX & Design
+    'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Design tools and wireframes
+    'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // UI/UX design sketches
+    'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Design workspace with tablet
+    
+    // 3D Animation & Graphics
+    'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // 3D abstract design
+    'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Abstract technology pattern
+    'https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // 3D geometric shapes
+    'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // 3D rendering workspace
+    'https://images.unsplash.com/photo-1545235617-9465d2a55698?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Abstract digital art
+    
+    // Team Collaboration & Development
+    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Team collaboration
+    'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Team meeting about code
+    'https://images.unsplash.com-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Developers working together
+    
+    // Modern Tech Stack
+    'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // React logo on screen
+    'https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Cloud computing concept
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Digital transformation
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Cybersecurity concept
+    
+    // Futuristic & Innovation
+    'https://images.unsplash.com/photo-1488229297570-58520851e868?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Futuristic code interface
+    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // AI neural network
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Digital matrix
+    'https://images.unsplash.com/photo-1527430253228-e93688616381?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80', // Virtual reality concept
+  ];
+
+  // Placeholder images for works without thumbnails
+  const getPlaceholderImage = (name) => {
+    return `https://via.placeholder.com/400x300/ffffff/000000?text=${encodeURIComponent(name)}`;
+  };
 
   // Tech code snippets for hover animations
   const techCodeSnippets = {
@@ -132,7 +203,7 @@ const Banner = () => {
     { code: 'docker-compose up', left: '50%', top: '15%', delay: 18 }
   ];
 
-  // Services data
+  // Services data with online images
   const services = [
     {
       id: 1,
@@ -140,7 +211,8 @@ const Banner = () => {
       title: 'Web Services',
       description: 'Custom websites, web applications, and e-commerce solutions',
       features: ['Responsive Design', 'E-commerce Platforms', 'Custom Web Apps', 'Progressive Web Apps'],
-      color: '#61dafb'
+      color: '#61dafb',
+      image: serviceImages[1]
     },
     {
       id: 2,
@@ -148,36 +220,42 @@ const Banner = () => {
       title: 'Software Services',
       description: 'Enterprise software, desktop applications, and custom development',
       features: ['Enterprise Solutions', 'Desktop Applications', 'Custom Software', 'API Integration'],
-      color: '#68a063'
+      color: '#68a063',
+      image: serviceImages[2]
     },
     {
       id: 3,
       icon: '📱',
       title: 'Application Services',
       description: 'Mobile apps, cross-platform solutions, and app maintenance',
-      features: ['Android Apps', 'App Maintenance', 'UI/UX Design'],
-      color: '#b89b7b'
+      features: ['Android Apps', 'iOS Apps', 'App Maintenance', 'UI/UX Design'],
+      color: '#b89b7b',
+      image: serviceImages[3]
     }
   ];
 
-  // Technologies data
+  // Technologies data with online images
   const technologies = [
-    { name: 'React', key: 'react', color: '#61dafb' },
-    { name: 'Node.js', key: 'node', color: '#68a063' },
-    { name: 'Python', key: 'python', color: '#3776ab' },
-    { name: 'Java', key: 'java', color: '#007396' },
-    { name: 'AWS', key: 'aws', color: '#FF9900' },
-    { name: 'MongoDB', key: 'mongodb', color: '#4DB33D' },
-    { name: 'Flutter', key: 'flutter', color: '#42A5F5' },
-    { name: 'Angular', key: 'angular', color: '#dd1b16' }
+    { name: 'React', key: 'react', color: '#61dafb', image: techImages.react },
+    { name: 'Node.js', key: 'node', color: '#68a063', image: techImages.node },
+    { name: 'Python', key: 'python', color: '#3776ab', image: techImages.python },
+    { name: 'Java', key: 'java', color: '#007396', image: techImages.java },
+    { name: 'AWS', key: 'aws', color: '#FF9900', image: techImages.aws },
+    { name: 'MongoDB', key: 'mongodb', color: '#4DB33D', image: techImages.mongodb },
+    { name: 'Flutter', key: 'flutter', color: '#42A5F5', image: techImages.flutter }
   ];
 
-  // Load recent works and reviews
+  // Background image carousel effect
   useEffect(() => {
-    loadData();
-  }, []);
+    const interval = setInterval(() => {
+      setCurrentBgIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+    }, 5000); // Change every 5 seconds
 
-  const loadData = async () => {
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
+
+  // Load recent works and reviews - wrapped in useCallback
+  const loadData = useCallback(async () => {
     try {
       setLoadingWorks(true);
       setLoadingReviews(true);
@@ -187,9 +265,15 @@ const Banner = () => {
         getReviews()
       ]);
       
+      // Add placeholder images to works without thumbnails
+      const enhancedWorksData = worksData.map(work => ({
+        ...work,
+        thumbnail: work.thumbnail || getPlaceholderImage(work.name)
+      }));
+      
       // Create a map of work IDs to work details
       const workMap = {};
-      worksData.forEach(work => {
+      enhancedWorksData.forEach(work => {
         workMap[work.id] = {
           name: work.name,
           thumbnail: work.thumbnail
@@ -199,7 +283,7 @@ const Banner = () => {
       setWorks(workMap);
       
       // Sort works by date (newest first) and take first 3
-      const sortedWorks = worksData.sort((a, b) => 
+      const sortedWorks = enhancedWorksData.sort((a, b) => 
         new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
       ).slice(0, 3);
       setRecentWorks(sortedWorks);
@@ -212,15 +296,23 @@ const Banner = () => {
       
     } catch (error) {
       console.error('Error loading data:', error);
+      // Set fallback data in case of error
+      setRecentWorks([]);
+      setRecentReviews([]);
     } finally {
       setLoadingWorks(false);
       setLoadingReviews(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // Render stars for rating
   const renderStars = (rating) => {
-    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    const numRating = parseInt(rating) || 0;
+    return '★'.repeat(numRating) + '☆'.repeat(5 - numRating);
   };
 
   // Mouse move effect for interactive background
@@ -289,7 +381,7 @@ const Banner = () => {
     const snippets = techCodeSnippets[tech] || techCodeSnippets.react;
     return snippets.map((code, index) => ({
       code,
-      left: `${Math.random() * 80 + 10}%`, // Random positions across the screen
+      left: `${Math.random() * 80 + 10}%`,
       top: `${Math.random() * 80 + 10}%`,
       delay: index * 0.2,
       duration: 4 + Math.random() * 3,
@@ -312,10 +404,41 @@ const Banner = () => {
 
   return (
     <section className="banner" ref={bannerRef}>
+      {/* Background Image Carousel */}
+      {backgroundImages.map((image, index) => (
+        <div
+          key={index}
+          className={`bg-carousel-image ${index === currentBgIndex ? 'active' : ''}`}
+          style={{
+            backgroundImage: `url(${image})`,
+          }}
+        />
+      ))}
+      
+      {/* Dark overlay for better text visibility */}
+      <div className="bg-overlay" />
+
       {/* Gradient Orbs */}
-      <div className="gradient-orb" style={{ transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)` }} />
-      <div className="gradient-orb" style={{ animationDelay: '-5s', transform: `translate(${mousePosition.x * -0.02}px, ${mousePosition.y * -0.02}px)` }} />
-      <div className="gradient-orb" style={{ animationDelay: '-10s', transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)` }} />
+      <div 
+        className="gradient-orb" 
+        style={{ 
+          transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)` 
+        }} 
+      />
+      <div 
+        className="gradient-orb" 
+        style={{ 
+          animationDelay: '-5s', 
+          transform: `translate(${mousePosition.x * -0.02}px, ${mousePosition.y * -0.02}px)` 
+        }} 
+      />
+      <div 
+        className="gradient-orb" 
+        style={{ 
+          animationDelay: '-10s', 
+          transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)` 
+        }} 
+      />
 
       {/* Particle Network */}
       <div className="particle-network" />
@@ -324,8 +447,18 @@ const Banner = () => {
       <div className="binary-rain" />
 
       {/* Floating Shapes */}
-      <div className="floating-shape floating-shape-1" style={{ transform: `translate(${mousePosition.x * 0.03}px, ${mousePosition.y * 0.03}px)` }} />
-      <div className="floating-shape floating-shape-2" style={{ transform: `translate(${mousePosition.x * -0.03}px, ${mousePosition.y * -0.03}px)` }} />
+      <div 
+        className="floating-shape floating-shape-1" 
+        style={{ 
+          transform: `translate(${mousePosition.x * 0.03}px, ${mousePosition.y * 0.03}px)` 
+        }} 
+      />
+      <div 
+        className="floating-shape floating-shape-2" 
+        style={{ 
+          transform: `translate(${mousePosition.x * -0.03}px, ${mousePosition.y * -0.03}px)` 
+        }} 
+      />
 
       {/* Background Code Snippets */}
       {backgroundCodeSnippets.map((snippet, index) => (
@@ -343,7 +476,7 @@ const Banner = () => {
         </div>
       ))}
 
-      {/* Global Tech Code Animation - This will spread across the whole page */}
+      {/* Global Tech Code Animation */}
       {hoveredTech && (
         <div className="tech-code-animation">
           {codeLines.map((line, idx) => (
@@ -369,28 +502,28 @@ const Banner = () => {
         <div className="banner-content">
           {/* Text Section */}
           <div className="banner-text" data-id="text">
-            <span className="title-greeting">WELCOME TO</span>
-            <h1 className="banner-title">
-              <span className="company-name">SHREE SHYAM</span>
-              <span className="company-subname">IT SOLUTIONS</span>
-            </h1>
-            
-            <p className="banner-description">
-              Transforming ideas into powerful digital solutions with 
-              <span className="highlight"> innovation </span> 
-              and 
-              <span className="highlight"> excellence</span>
-            </p>
-            
-            <div className="coding-badges">
-              <span className="badge">{'<html>'}</span>
-              <span className="badge">{'<react/>'}</span>
-              <span className="badge">{'{code}'}</span>
-              <span className="badge">#python</span>
-              <span className="badge">{'</>'}</span>
-              <span className="badge">$ npm run</span>
-            </div>
-          </div>
+  <span className="title-greeting">WELCOME TO</span>
+  <h1 className="banner-title">
+    <span className="company-name">SHREE SHYAM</span>
+    <span className="company-subname">IT SOLUTIONS</span>
+  </h1>
+  
+  <p className="banner-description">
+    Transforming ideas into powerful digital solutions with 
+    <span className="highlight"> innovation </span> 
+    and 
+    <span className="highlight"> excellence</span>
+  </p>
+  
+  <div className="coding-badges">
+    <span className="badge">{'<html>'}</span>
+    <span className="badge">{'<react/>'}</span>
+    <span className="badge">{'{code}'}</span>
+    <span className="badge">#python</span>
+    <span className="badge">{'</>'}</span>
+    <span className="badge">$ npm run</span>
+  </div>
+</div>
           
           {/* Stats Section */}
           <div className="banner-stats" data-id="stats" ref={statsRef}>
@@ -411,7 +544,7 @@ const Banner = () => {
             </div>
           </div>
           
-          {/* Services Section */}
+          {/* Services Section with Images */}
           <div className="services-showcase" data-id="services">
             <h2 className="section-label">OUR SERVICES</h2>
             <div className="services-grid">
@@ -423,16 +556,27 @@ const Banner = () => {
                   onMouseLeave={() => setActiveService(null)}
                   style={{
                     transform: activeService === service.id ? 'scale(1.02)' : 'scale(1)',
-                    borderColor: activeService === service.id ? service.color : 'rgba(226, 232, 240, 0.5)'
+                    borderColor: activeService === service.id ? service.color : 'rgba(255, 255, 255, 0.2)'
                   }}
                 >
-                  <div 
-                    className="service-icon-wrapper"
-                    style={{
-                      background: activeService === service.id ? service.color : 'linear-gradient(135deg, #b89b7b15, #d4b79c15)'
-                    }}
-                  >
-                    <span className="service-icon">{service.icon}</span>
+                  <div className="service-image-wrapper">
+                    <img 
+                      src={service.image} 
+                      alt={service.title}
+                      className="service-image"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/400x200/ffffff/000000?text=Service+Image';
+                      }}
+                    />
+                    <div 
+                      className="service-icon-wrapper"
+                      style={{
+                        background: activeService === service.id ? service.color : 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2))'
+                      }}
+                    >
+                      <span className="service-icon">{service.icon}</span>
+                    </div>
                   </div>
                   <div className="service-content">
                     <h3>{service.title}</h3>
@@ -468,53 +612,78 @@ const Banner = () => {
             </div>
           </div>
 
-          {/* Recent Works Section */}
-          <div className="recent-works-showcase" data-id="works">
-            <h2 className="section-label">RECENT PROJECTS</h2>
-            {loadingWorks ? (
-              <div className="works-loading">Loading recent works...</div>
-            ) : (
-              <div className="recent-works-grid">
-                {recentWorks.map((work) => (
-                  <Link to={`/work/${work.id}`} key={work.id} className="recent-work-card">
-                    <div className="recent-work-image-wrapper">
-                      <img 
-                        src={work.thumbnail} 
-                        alt={work.name}
-                        className="recent-work-image"
-                      />
-                      <div className="recent-work-overlay">
-                        <span className="view-details">View Details →</span>
-                      </div>
-                    </div>
-                    <div className="recent-work-info">
-                      <h3 className="recent-work-title">{work.name}</h3>
-                      <p className="recent-work-description">{work.description}</p>
-                    </div>
-                  </Link>
-                ))}
+          {/* Recent Works Section - Only show if there are works */}
+{/* Recent Works Section - Only show if there are works */}
+{!loadingWorks && recentWorks.length > 0 && (
+  <div className="recent-works-showcase" data-id="works">
+    <h2 className="section-label">RECENT PROJECTS</h2>
+    <div className="recent-works-list">
+      {recentWorks.map((work, index) => (
+        <div key={work.id} className={`recent-work-item ${index % 2 === 1 ? 'reverse' : ''}`}>
+          <div className="recent-work-image-container">
+            <Link to={`/work/${work.id}`} className="recent-work-image-link">
+              <img 
+                src={work.thumbnail} 
+                alt={work.name}
+                className="recent-work-image"
+                loading="lazy"
+                onError={(e) => {
+                  e.target.src = getPlaceholderImage(work.name);
+                }}
+              />
+              <div className="recent-work-image-overlay">
+                <span className="view-project">View Project</span>
               </div>
-            )}
-            <div className="view-all-link">
-              <Link to="/works" className="btn btn-outline">
-                View All Projects
-                <span className="btn-arrow">→</span>
-              </Link>
+            </Link>
+          </div>
+          
+          <div className="recent-work-details">
+            <h3 className="recent-work-title">{work.name}</h3>
+            <p className="recent-work-description">{work.description || 'No description available'}</p>
+            
+            <div className="recent-work-meta">
+              {work.technologies && work.technologies.length > 0 && (
+                <div className="work-technologies">
+                  {work.technologies.slice(0, 3).map((tech, idx) => (
+                    <span key={idx} className="work-tech-badge">{tech}</span>
+                  ))}
+                  {work.technologies.length > 3 && (
+                    <span className="work-tech-badge">+{work.technologies.length - 3}</span>
+                  )}
+                </div>
+              )}
+              
+              <div className="recent-work-actions">
+                <Link to={`/work/${work.id}`} className="work-details-btn">
+                  View Details
+                  <span className="btn-arrow">→</span>
+                </Link>
+              </div>
             </div>
           </div>
+        </div>
+      ))}
+    </div>
+    
+    <div className="view-all-link">
+      <Link to="/works" className="btn btn-outline">
+        View All Projects
+        <span className="btn-arrow">→</span>
+      </Link>
+    </div>
+  </div>
+)}
 
-          {/* Recent Reviews Section */}
-          <div className="recent-reviews-showcase" data-id="reviews">
-            <h2 className="section-label">CLIENT REVIEWS</h2>
-            {loadingReviews ? (
-              <div className="reviews-loading">Loading recent reviews...</div>
-            ) : (
+          {/* Recent Reviews Section - Only show if there are reviews */}
+          {!loadingReviews && recentReviews.length > 0 && (
+            <div className="recent-reviews-showcase" data-id="reviews">
+              <h2 className="section-label">CLIENT REVIEWS</h2>
               <div className="recent-reviews-grid">
                 {recentReviews.map((review) => (
                   <div key={review.id} className="recent-review-card">
                     <div className="review-header">
                       <div className="reviewer-info">
-                        <h3 className="reviewer-name">{review.name}</h3>
+                        <h3 className="reviewer-name">{review.name || 'Anonymous'}</h3>
                         {works[review.workId] && (
                           <Link to={`/work/${review.workId}`} className="review-work-link">
                             on {works[review.workId].name}
@@ -522,43 +691,52 @@ const Banner = () => {
                         )}
                       </div>
                       <div className="review-rating">
-                        {renderStars(parseInt(review.rating))}
+                        {renderStars(review.rating)}
                       </div>
                     </div>
-                    <p className="review-text">"{review.review}"</p>
+                    <p className="review-text">"{review.review || 'No review text'}"</p>
                     <small className="review-date">
-                      {new Date(review.createdAt).toLocaleDateString()}
+                      {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recent'}
                     </small>
                   </div>
                 ))}
               </div>
-            )}
-            <div className="view-all-link">
-              <Link to="/reviews" className="btn btn-outline">
-                View All Reviews
-                <span className="btn-arrow">→</span>
-              </Link>
+              <div className="view-all-link">
+                <Link to="/reviews" className="btn btn-outline">
+                  View All Reviews
+                  <span className="btn-arrow">→</span>
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
           
-          {/* Tech Stack Section */}
+          {/* Tech Stack Section with Images */}
           <div className="tech-stack" data-id="tech">
             <h3 className="tech-title">Technologies We Work With</h3>
             <div className="tech-icons">
               {technologies.map((tech) => (
-                <div key={tech.key} style={{ position: 'relative' }}>
-                  <span 
-                    className="tech-item"
+                <div key={tech.key} className="tech-item-wrapper">
+                  <div 
+                    className={`tech-item ${hoveredTech === tech.key ? 'active' : ''}`}
                     onMouseEnter={() => handleTechHover(tech.key)}
                     onMouseLeave={() => handleTechHover(null)}
                     style={{
-                      backgroundColor: hoveredTech === tech.key ? tech.color : 'rgba(255, 255, 255, 0.9)',
-                      color: hoveredTech === tech.key ? 'white' : '#1e293b',
+                      backgroundColor: hoveredTech === tech.key ? tech.color : 'rgba(255, 255, 255, 0.95)',
+                      color: hoveredTech === tech.key ? 'white' : '#000000',
                       transform: hoveredTech === tech.key ? 'translateY(-8px) scale(1.1)' : 'translateY(0) scale(1)'
                     }}
                   >
-                    {tech.name}
-                  </span>
+                    <img 
+                      src={tech.image} 
+                      alt={tech.name}
+                      className="tech-icon-image"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/24/000000/ffffff?text=Tech';
+                      }}
+                    />
+                    <span className="tech-name">{tech.name}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -597,6 +775,7 @@ const Banner = () => {
           </div>
         </div>
       </div>
+
     </section>
   );
 };
