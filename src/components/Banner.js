@@ -744,10 +744,10 @@ const Banner = () => {
           
           {/* CTA Buttons */}
           <div className="banner-cta" data-id="cta">
-            <button className="btn btn-primary">
+            <Link to="/contact" className="btn btn-primary">
               <span>Start Your Project</span>
               <span className="btn-arrow">→</span>
-            </button>
+            </Link>
             <Link to="/works" className="btn btn-outline">
               <span>View Our Work</span>
               <span className="btn-arrow">→</span>
