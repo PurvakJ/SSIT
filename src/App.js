@@ -51,7 +51,7 @@ const deleteReview = (d) => apiPost('deleteReview', d);
    Shared constants & small components
    ========================================================================== */
 
-const LOGO_URL = 'https://i.postimg.cc/cH2C6rgk/611276591-17933684004156896-6444722502286434287-n-(1).jpg';
+const LOGO_URL = 'https://i.postimg.cc/0QHSjnK6/611276591-17933684004156896-6444722502286434287-n-1-removebg-preview.png';
 const LINKEDIN_URL = 'https://www.linkedin.com/in/purvak-jindal-6741682a1/';
 const INSTAGRAM_URL = 'https://www.instagram.com/shree_shyam_it_solutions/';
 
