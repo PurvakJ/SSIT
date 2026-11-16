@@ -2569,6 +2569,12 @@ function AppContent() {
     return () => { clearInterval(interval); clearTimeout(hideTimer); };
   }, []);
 
+  /* lock page scroll while the mobile menu is open */
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
   /* keyboard shortcut + cursor glow (mouse only, never on touch screens) */
   useEffect(() => {
     const onKey = (e) => {
@@ -2616,7 +2622,8 @@ function AppContent() {
           if (Math.abs(d) < 12) return;
           last = y;
           const tall = document.documentElement.scrollHeight > window.innerHeight * 1.6;
-          setHidden(tall && d > 0 && y > 400);
+          const desktop = window.innerWidth > 1100; /* never hide the header on phones/tablets */
+          setHidden(desktop && tall && d > 0 && y > 400);
         },
       });
     });

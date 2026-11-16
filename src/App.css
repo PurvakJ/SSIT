@@ -30,14 +30,15 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: auto; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: auto; overflow-x: clip; }
 body {
   background: var(--black);
   color: var(--cream);
   font-family: 'Hanken Grotesk', system-ui, sans-serif;
   font-weight: 400;
   line-height: 1.4;
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -52,7 +53,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; line-height:
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* app is a flex column so the footer always sits at the bottom */
-.App { min-height: 100vh; min-height: 100dvh; position: relative; display: flex; flex-direction: column; }
+.App { min-height: 100vh; min-height: 100dvh; position: relative; display: flex; flex-direction: column; overflow-x: clip; }
 .main { position: relative; z-index: 1; padding-top: 0; flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; }
 .route { flex: 1 0 auto; width: 100%; }
 .muted { color: var(--s75); }
@@ -703,8 +704,22 @@ select, .select { background: var(--black); border: 1px solid var(--s25); border
    ========================================================================== */
 @media (max-width: 1100px) {
   .menu-toggle { display: flex; }
-  .site-nav { position: fixed; inset: 0; background: var(--cream); color: var(--black); flex-direction: column; justify-content: center; gap: 2.5rem; transform: translateX(100%); transition: transform 0.5s var(--ease-io); z-index: 2; }
-  .site-nav.open { transform: none; }
+
+  /* Menu is hidden with clip-path + visibility (NOT transform), so it can never cause sideways scrolling */
+  .site-nav {
+    position: fixed; inset: 0;
+    background: var(--cream); color: var(--black);
+    flex-direction: column; justify-content: center; gap: 2.5rem;
+    clip-path: inset(0 0 0 100%);
+    visibility: hidden; pointer-events: none;
+    transition: clip-path 0.5s var(--ease-io), visibility 0s linear 0.5s;
+    z-index: 2;
+  }
+  .site-nav.open {
+    clip-path: inset(0);
+    visibility: visible; pointer-events: auto;
+    transition: clip-path 0.5s var(--ease-io), visibility 0s;
+  }
   .site-nav ul { flex-direction: column; align-items: center; gap: 1.2rem; }
   .nav-link { font-size: 2.2rem; color: var(--black); }
   .nav-link:hover, .nav-link.active { color: var(--black); }
@@ -715,10 +730,11 @@ select, .select { background: var(--black); border: 1px solid var(--s25); border
   .menu-toggle.active span { background: var(--black); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 
-  /* backdrop-filter / transform on the header trap the fixed menu inside it and make scrolling stutter on phones */
+  /* No backdrop-filter and NO transform on the header on phones (both trap the fixed menu inside the header) */
   .site-header.scrolled { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(14, 16, 15, 0.97); }
-  .site-header.is-hidden { transform: none; }
-  .site-header.is-hidden:not(.menu-open) { transform: translateY(-110%); }
+  .site-header, .site-header.is-hidden { transform: none !important; }
+
+  .cursor-glow, .grain { display: none; }
 }
 @media (max-width: 1023px) {
   .story-row { display: none; }
