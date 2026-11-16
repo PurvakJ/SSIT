@@ -86,7 +86,7 @@ const deleteReview = (d) => apiPost('deleteReview', d);
 /* ==========================================================================
    Constants & helpers
    ========================================================================== */
-const LOGO_URL = 'https://i.postimg.cc/0QHSjnK6/611276591-17933684004156896-6444722502286434287-n-1-removebg-preview.png';
+const LOGO_URL = 'https://res.cloudinary.com/dm9gg8yss/image/upload/v1794835909/74048215-fdd2-4805-bd68-a6e2b99d372f_klok1o.png';
 const LINKEDIN_URL = 'https://www.linkedin.com/in/purvak-jindal-6741682a1/';
 const INSTAGRAM_URL = 'https://www.instagram.com/shree_shyam_it_solutions/';
 const ADMIN_EMAIL = 'purvakjindal2102@gmail.com';
