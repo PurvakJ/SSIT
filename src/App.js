@@ -120,6 +120,120 @@ const NAV_ITEMS = [
 const prefersReduced = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* Magnetic cursor: dot follows the mouse, ring trails and expands over clickable things */
+const MAGNET =
+  'a, button, .btn, .pill, .tab-btn, .tech-tile, .worktype, .star.interactive, .social-link, .menu-toggle, .back-to-top, .announce-close, .close-btn, select, input[type="range"], [role="button"]';
+
+  function MagneticCursor() {
+    const outer = useRef(null);
+    const inner = useRef(null);
+    const arrow = useRef(null);
+  
+    useEffect(() => {
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return undefined;
+      const root = document.documentElement;
+      root.classList.add('has-mc');
+  
+      const all = [outer.current, inner.current, arrow.current];
+      const setAx = gsap.quickSetter(arrow.current, 'x', 'px');
+      const setAy = gsap.quickSetter(arrow.current, 'y', 'px');
+      const inX = gsap.quickTo(inner.current, 'x', { duration: 0.25, ease: 'power3' });
+      const inY = gsap.quickTo(inner.current, 'y', { duration: 0.25, ease: 'power3' });
+      const outX = gsap.quickTo(outer.current, 'x', { duration: 0.55, ease: 'power3' });
+      const outY = gsap.quickTo(outer.current, 'y', { duration: 0.55, ease: 'power3' });
+  
+      let target = null;
+      let shown = false;
+      let mx = 0;
+      let my = 0;
+  
+      const place = () => {
+        setAx(mx); setAy(my);
+        if (target) {
+          const r = target.getBoundingClientRect();
+          const cx = r.left + r.width / 2;
+          const cy = r.top + r.height / 2;
+          inX(mx + (cx - mx) * 0.15); inY(my + (cy - my) * 0.15);
+          outX(mx + (cx - mx) * 0.3); outY(my + (cy - my) * 0.3);
+        } else {
+          inX(mx); inY(my); outX(mx); outY(my);
+        }
+      };
+  
+      const move = (e) => {
+        mx = e.clientX; my = e.clientY;
+        if (!shown) {
+          shown = true;
+          gsap.set(all, { x: mx, y: my });
+          gsap.to(all, { opacity: 1, duration: 0.3 });
+        }
+        place();
+      };
+  
+      const over = (e) => {
+        const t = e.target.closest?.(MAGNET);
+        if (!t || t.disabled) return;
+        target = t;
+        outer.current.classList.add('is-active');
+        inner.current.classList.add('is-active');
+        gsap.to(outer.current, { scale: 1.5, duration: 0.45, ease: 'power3.out' });
+        gsap.to(inner.current, { scale: 1.35, duration: 0.35, ease: 'power3.out' });
+        gsap.to(arrow.current, { scale: 0.85, duration: 0.3 });
+        place();
+      };
+  
+      const out = (e) => {
+        const t = e.target.closest?.(MAGNET);
+        if (!t || t !== target || t.contains(e.relatedTarget)) return;
+        target = null;
+        outer.current.classList.remove('is-active');
+        inner.current.classList.remove('is-active');
+        gsap.to([outer.current, inner.current, arrow.current], { scale: 1, duration: 0.4, ease: 'power3.out' });
+        place();
+      };
+  
+      const down = () => {
+        gsap.to(inner.current, { scale: 0.7, duration: 0.15 });
+        gsap.to(outer.current, { scale: target ? 1.2 : 0.8, duration: 0.2 });
+      };
+      const up = () => {
+        gsap.to(inner.current, { scale: target ? 1.35 : 1, duration: 0.3 });
+        gsap.to(outer.current, { scale: target ? 1.5 : 1, duration: 0.3 });
+      };
+      const leave = () => gsap.to(all, { opacity: 0, duration: 0.2 });
+      const enter = () => { if (shown) gsap.to(all, { opacity: 1, duration: 0.2 }); };
+  
+      window.addEventListener('pointermove', move);
+      document.addEventListener('mouseover', over);
+      document.addEventListener('mouseout', out);
+      window.addEventListener('mousedown', down);
+      window.addEventListener('mouseup', up);
+      root.addEventListener('mouseleave', leave);
+      root.addEventListener('mouseenter', enter);
+  
+      return () => {
+        root.classList.remove('has-mc');
+        window.removeEventListener('pointermove', move);
+        document.removeEventListener('mouseover', over);
+        document.removeEventListener('mouseout', out);
+        window.removeEventListener('mousedown', down);
+        window.removeEventListener('mouseup', up);
+        root.removeEventListener('mouseleave', leave);
+        root.removeEventListener('mouseenter', enter);
+      };
+    }, []);
+  
+    return (
+      <>
+        <div className="mc-outer" ref={outer} aria-hidden="true" />
+        <div className="mc-inner" ref={inner} aria-hidden="true" />
+        <svg className="mc-arrow" ref={arrow} viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M4 2V23L9 18L13 27L16.5 25.5L12.5 17H19.5Z" fill="#ff8709" stroke="#0e100f" strokeWidth="1.8" strokeLinejoin="round" />
+        </svg>
+      </>
+    );
+  }
+
 /* gsap.context scoped to a ref. The callback may return a cleanup function. */
 function useGsap(fn, deps = []) {
   const scope = useRef(null);
@@ -2775,6 +2889,8 @@ function AppContent() {
       <button className={`back-to-top ${scrolled ? 'visible' : ''}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 15l6-6 6 6" /></svg>
       </button>
+      <div className="grain" aria-hidden="true" />
+      <MagneticCursor />
     </div>
   );
 }
