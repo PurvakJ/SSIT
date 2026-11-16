@@ -84,8 +84,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; line-height:
 .site-header.is-hidden { transform: translateY(-110%); }
 .site-header.scrolled { background: rgba(14, 16, 15, 0.88); backdrop-filter: blur(14px); }
 .header-inner { max-width: 120rem; margin: 0 auto; padding: 0.75rem clamp(1.5rem, 3vw, 3rem); display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
-.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
-.brand-logo { width: 2.6rem; height: 2.6rem; object-fit: contain; }
+.brand { display: flex; align-items: center; gap: 0.9rem; text-decoration: none; }
+.brand-logo { width: 4.2rem; height: 4.2rem; object-fit: contain; flex: none; }
 .brand-name { display: flex; flex-direction: column; line-height: 1; font-weight: 800; }
 .brand-1 { font-size: 1rem; letter-spacing: 0.04em; color: var(--cream); }
 .brand-2 { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--green); margin-top: 0.2rem; }
@@ -655,7 +655,9 @@ select, .select { background: var(--black); border: 1px solid var(--s25); border
    ========================================================================== */
 .footer { background: #0a0c0b; border-top: 1px solid var(--s25); margin-top: auto; flex: none; }
 .footer-grid { max-width: 120rem; margin: 0 auto; padding: 4rem var(--gut); display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.3fr; gap: 3rem; }
-.footer-logo { margin-bottom: 1rem; }
+/* logo sits to the left of the brand name */
+.footer-logo { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.footer-logo-img { width: 5rem; height: 5rem; object-fit: contain; flex: none; }
 .footer-text { color: var(--s75); margin-bottom: 1.2rem; max-width: 22rem; }
 .footer h4 { font-size: 1rem; margin-bottom: 1.2rem; }
 .fc-green h4 { color: var(--green); } .fc-orange h4 { color: var(--orange); } .fc-blue h4 { color: var(--blue); }
@@ -775,6 +777,12 @@ select, .select { background: var(--black); border: 1px solid var(--s25); border
   .footer-grid, .industry-grid, .info-grid, .values-grid { grid-template-columns: 1fr; }
   .btn-ring { font-size: 1.1rem; }
   .sv-card { width: 30%; padding: 0.6rem; }
+  /* keep the larger logo from crowding the header on small phones */
+  .brand-logo { width: 3.4rem; height: 3.4rem; }
+  .brand { gap: 0.6rem; }
+  .brand-1 { font-size: 0.9rem; }
+  .brand-2 { font-size: 0.6rem; }
+  .footer-logo-img { width: 4.2rem; height: 4.2rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

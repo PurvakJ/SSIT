@@ -487,7 +487,11 @@ function Footer() {
     <footer className="footer">
       <div className="footer-grid">
         <div>
-          <h3 className="footer-logo"><BrandName /></h3>
+          {/* logo first, then the brand name */}
+          <h3 className="footer-logo">
+            <img src={LOGO_URL} alt="Shree Shyam IT Solutions logo" className="footer-logo-img" />
+            <BrandName />
+          </h3>
           <p className="footer-text">Creating innovative digital solutions that help businesses grow and succeed in the modern world.</p>
           <SocialLinks />
         </div>
