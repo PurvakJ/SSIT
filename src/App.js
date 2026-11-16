@@ -2551,8 +2551,19 @@ function AppContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [announceClosed, setAnnounceClosed] = useState(() => {
+    try { return sessionStorage.getItem('announceClosed') === 'true'; } catch { return false; }
+  });
   const navigate = useNavigate();
   const location = useLocation();
+
+  /* announcement bar: homepage only, and the visitor can close it with the cross */
+  const showAnnounce = location.pathname === '/' && !announceClosed;
+  const closeAnnounce = () => {
+    setAnnounceClosed(true);
+    try { sessionStorage.setItem('announceClosed', 'true'); } catch { /* ignore */ }
+    safeRefresh(150); /* page got shorter, so re-measure the scroll triggers */
+  };
 
   /* The admin area runs with NO scroll-linked effects (no hiding header, no progress bar,
      no ScrollTrigger refreshes), so it scrolls smoothly on phones and never jumps to the top. */
@@ -2712,10 +2723,15 @@ function AppContent() {
       <div className="cursor-glow" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
 
-      <div className="announce">
-        Now booking new projects: websites, apps and software.
-        <Link to="/contact">Get a free quote</Link>
-      </div>
+      {showAnnounce && (
+        <div className="announce">
+          <span className="announce-text">Now booking new projects: websites, apps and software.</span>
+          <Link to="/contact">Get a free quote</Link>
+          <button type="button" className="announce-close" onClick={closeAnnounce} aria-label="Close announcement">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+      )}
 
       <header className={`site-header ${scrolled ? 'scrolled' : ''} ${hidden && !menuOpen ? 'is-hidden' : ''} ${menuOpen ? 'menu-open' : ''}`}>
         <div className="header-inner">

@@ -75,8 +75,10 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; line-height:
 /* ==========================================================================
    Announcement + header
    ========================================================================== */
-.announce { background: var(--grad-macha); color: var(--black); text-align: center; font-size: 0.9rem; font-weight: 500; padding: 0.85rem 1rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.announce { position: relative; background: var(--grad-macha); color: var(--black); text-align: center; font-size: 0.9rem; font-weight: 500; padding: 0.85rem 3.2rem 0.85rem 1rem; display: flex; gap: 0.75rem; justify-content: center; align-items: center; flex-wrap: wrap; }
 .announce a { font-weight: 700; }
+.announce-close { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; color: var(--black); transition: background 0.25s; }
+.announce-close:hover { background: rgba(14, 16, 15, 0.15); }
 
 .site-header { position: sticky; top: 0; z-index: 100; background: var(--black); border-bottom: 1px solid var(--s25); transition: transform 0.5s var(--ease-out), background 0.3s; }
 .site-header.is-hidden { transform: translateY(-110%); }
